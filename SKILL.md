@@ -1,9 +1,9 @@
 ---
-name: uber-skills
+name: uberskills
 description: Save, view and remove trusted agent skills from your personal skill list. Use when the user wants to save a skill, see what skills they have saved, or remove a skill from their list.
 ---
 
-# Uber-Skills
+# UberSkills
 
 Manage your personal list of trusted agent skills.
 

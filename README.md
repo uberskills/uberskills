@@ -1,4 +1,4 @@
-# uberskills
+# UberSkills
 
 Save, share and discover trusted agent skills.
 
