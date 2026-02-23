@@ -1,0 +1,23 @@
+{
+  "name": "uberskills",
+  "version": "0.1.0",
+  "description": "Save, share and discover trusted agent skills",
+  "keywords": [
+    "uberskills",
+    "agent-skills",
+    "openclaw",
+    "skill",
+    "ai-agent",
+    "claude-code"
+  ],
+  "homepage": "https://github.com/uberskills/uberskills",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uberskills/uberskills.git"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "skills": [
+    "uberskills"
+  ]
+}
