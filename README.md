@@ -5,7 +5,7 @@ Save, share and discover trusted agent skills.
 ## Install
 
 ```bash
-npx skills add uberskills/uberskills -g -y
+npx skills add uberskills/uberskills
 ```
 
 ## Update
