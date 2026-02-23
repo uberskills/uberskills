@@ -59,11 +59,15 @@ Remote: GitHub Gist (public, shareable)
 
 ## Workflow: discover new skills (autonomous track)
 
-1. Run `node ~/.config/uberskills/fetch-registry.js "<query>" --limit 20`.
-   (falls back to `node <skill-dir>/fetch-registry.js` if not found locally)
-2. Cross-reference with skills.json and any extended lists.
-3. Rank: trusted list first, then by registry score.
-4. Present top N with name, description, author, install command.
+1. Locate `fetch-registry.js` — it lives in the same directory as this SKILL.md.
+   Find it with:
+   ```
+   find ~/.agents/skills ~/.claude/skills ~/skills -name "fetch-registry.js" 2>/dev/null | head -1
+   ```
+2. Run `node <path> "<query>" --limit 20`
+3. Cross-reference with skills.json and any extended lists.
+4. Rank: trusted list first, then by registry score.
+5. Present top N with name, description, author, install command.
 
 ## Workflow: trust an author (autonomous track)
 
