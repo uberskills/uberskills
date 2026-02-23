@@ -18,7 +18,7 @@ Manage your personal list of trusted agent skills.
 ```json
 {
   "version": "1",
-  "name": "My skills",
+  "name": "alice's skills",
   "skills": [
     "github:owner/repo",
     "npm:package-name",
@@ -34,7 +34,7 @@ If `~/.config/uberskills/skills.json` does not exist:
 1. Scan `~/.claude/skills/` and `~/.agents/skills/` for installed skills — each subdirectory with a `SKILL.md` is a skill.
 2. For each, read the `name` field from the SKILL.md frontmatter.
 3. Try to find a matching GitHub source by checking if `https://github.com/<name>/<name>` exists (just note it as `github:<name>/<name>` — don't fetch). Otherwise record as `local:<name>`.
-4. Create `~/.config/uberskills/` if needed and write `skills.json` with the discovered skills.
+4. Run `whoami` to get the system username. Create `~/.config/uberskills/` if needed and write `skills.json` with `"name": "<username>'s skills"` and the discovered skills.
 5. Say: "Found N installed skills and saved them as a starting point — not published yet. Here's your list: ..."
 
 ## Normalize a SkillRef
