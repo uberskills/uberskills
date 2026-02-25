@@ -1,7 +1,7 @@
 {
   "name": "uberskills",
   "version": "0.1.0",
-  "description": "Save, share and discover trusted agent skills",
+  "description": "Trusted agent skill discovery with a personal trust network",
   "keywords": [
     "uberskills",
     "agent-skills",
@@ -16,7 +16,6 @@
     "url": "https://github.com/uberskills/uberskills.git"
   },
   "license": "MIT",
-  "main": "index.js",
   "skills": [
     "uberskills"
   ]

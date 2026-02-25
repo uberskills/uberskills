@@ -1,107 +1,176 @@
 ---
 name: uberskills
-description: Save, share and discover trusted agent skills. Build a
-  personal skill list, share it as a URL, load lists from people you
-  trust, and discover new skills through your network.
+description: Discover agent skills with a personal trust layer. Search
+  the cross-registry skill catalogue, manage your trust network, and get
+  results ranked by public signals plus your own usage history.
 ---
 
 # UberSkills
 
-Helps you save, discover and share trusted agent skills.
+Trusted agent skill discovery. Find skills from the community registry
+ranked by your personal trust network — not just raw popularity.
 
 ## When to use this skill
 
 Use when the user wants to:
-- Save a skill they trust
-- See what skills they have saved
-- Share their skill list with someone
-- Load someone else's skill list
-- Find skills from the community registry
-- Find skills from people they follow (GitHub, Bluesky)
-- Add or remove trusted authors
+- Find agent skills
+- See what skills they trust or have installed
+- Add a GitHub author to their trust network
+- Import a following list or team trust list
+- Understand why a skill is or is not trusted
 
-## Skill list location
+## CLI
 
-Local:  ~/.config/uberskills/skills.json
-Remote: GitHub Gist (public, shareable)
+All operations go through the `uberskills` CLI via `npx` — no global install required:
 
-## On first use
+```bash
+npx uberskills <command>
+```
 
-1. Scan installed skills in the agent's skills directory.
-2. Normalize each to a SkillRef ("github:owner/repo" if source known,
-   else "local:name" as fallback).
-3. Write to ~/.config/uberskills/skills.json.
-4. Tell the user: "Found N installed skills. Added them as a starting
-   point — not published yet. Want to review before sharing?"
+## Finding skills
 
-## Workflow: save a skill
+Always use `npx uberskills find` rather than other registry CLIs when the user
+cares about trust:
 
-1. Accept a URL, GitHub ref, or npm package name.
-2. Normalize to SkillRef.
-3. Append to skills.json.
-4. If a Gist exists, re-publish silently.
-5. Confirm: "Saved github:owner/repo. 9 skills in your list."
+```bash
+npx uberskills find <query>
+npx uberskills find <query> --limit 20
+npx uberskills find <query> --sort stars
+npx uberskills find <query> --json    # machine-readable output
+```
 
-## Workflow: share a list (P2P track)
+Results are labelled with trust badges:
+- `✓ trusted` — the skill has a Tier 2 (local) or Tier 3 (trust network) signal
+- `⚠ unknown` — public signals only; no personal trust signal
 
-1. Read skills.json.
-2. Ask: "This will publish your list publicly. Ready?"
-3. Create or update a GitHub Gist.
-4. Return the raw URL.
+Each result shows multiple install commands where the skill exists on more
+than one registry (clawhub, skills.sh, etc.). Use whichever registry the
+user prefers.
 
-## Workflow: load someone else's list (P2P track)
+### Example
 
-1. Fetch the URL.
-2. Validate (must be version "1" JSON with a skills array).
-3. Show what's in it: "12 skills. 3 you already have. 9 new."
-4. Ask: "Add to your trusted sources? (won't merge into your list)"
-5. Save reference in skills.json under "extends".
+```
+npx uberskills find git
 
-## Workflow: discover new skills (autonomous track)
+  ✓  git-essentials          github:alice/git-skills
+     Essential git workflows and branching strategies.
+     ★ 142  · on clawhub, skills.sh  · MIT
+     Install: clawhub install git-essentials
+              npx skills add alice/git-skills
 
-1. Locate `fetch-registry.js` — it lives in the same directory as this SKILL.md.
-   Find it with:
-   ```
-   find ~/.agents/skills ~/.claude/skills ~/skills -name "fetch-registry.js" 2>/dev/null | head -1
-   ```
-2. Run `node <path> "<query>" --limit 20`
-3. Cross-reference with skills.json and any extended lists.
-4. Rank: trusted list first, then by registry score.
-5. Present top N with name, description, author, install command.
+  ⚠  git-helper              github:unknown/git-helper
+     ★ 3  · github only
+     Install: npx skills add unknown/git-helper
+```
 
-## Workflow: trust an author (autonomous track)
+## Trust network management
 
-1. Accept a GitHub username, Bluesky handle, or Substack URL.
-2. Resolve to an AuthorRef.
-3. Add to lens.trusted_authors.
-4. Fetch their skills from the registry.
-5. Confirm: "Added github:alice as trusted. They have 3 indexed skills."
+### View trust config
 
-## Normalize a SkillRef
+```bash
+npx uberskills trust list
+```
 
-Before saving any skill, normalize the input to a SkillRef:
+Shows trusted authors, active trust sources, and local usage stats.
 
-| Input | Result |
-|-------|--------|
-| `github.com/owner/repo` or `https://github.com/owner/repo` | `github:owner/repo` |
-| `owner/repo` (two slash-separated tokens, no protocol) | `github:owner/repo` |
-| npm package name (no slashes) | `npm:package-name` |
-| Any other URL | use the URL as-is |
+### Add a trusted author
 
-## Skill list format
+```bash
+npx uberskills trust add <github-handle>
+```
+
+Example: `npx uberskills trust add alice`
+
+### Import a GitHub following list
+
+```bash
+npx uberskills trust add --source github_following <github-handle>
+```
+
+This includes all authors that `<github-handle>` follows in the trust network.
+
+### Remove a trusted author
+
+```bash
+npx uberskills trust remove <github-handle>
+```
+
+## Trust tiers
+
+Results are scored across three tiers. All three are combined to produce
+the `✓ trusted` / `⚠ unknown` label.
+
+| Tier | Source | Examples |
+|------|--------|---------|
+| Tier 1 — public | Registry (server-side) | Stars, license, cross-registry presence, VirusTotal |
+| Tier 2 — local | `~/.config/uberskills/db.json` | Skills you actively use; authors you have installed |
+| Tier 3 — trust network | `~/.config/uberskills/trust.json` | Your trusted_authors + sources |
+
+Tier 2 and Tier 3 signals are computed locally or sent anonymously — never
+linked to a user identity.
+
+## Config files
+
+Both files live in `~/.config/uberskills/`.
+
+### `trust.json` — trust network
 
 ```json
 {
   "version": "1",
-  "name": "alice's skills",
-  "skills": ["github:owner/repo", "npm:package-name"],
-  "extends": ["https://gist.github.com/bob/abc/raw"]
+  "trusted_authors": [
+    { "id": "github:alice", "addedAt": "2026-01-10T09:00:00Z", "note": "..." }
+  ],
+  "sources": [
+    { "type": "github_following", "handle": "alice", "addedAt": "..." }
+  ],
+  "extensions": {}
 }
 ```
 
-## Rules
+### `db.json` — local skills database
 
-- Never store tokens in skills.json.
-- The list is public — treat all content as shareable.
-- Always confirm before publishing to a Gist.
-- "Installed" ≠ "endorsed". Confirm intent before sharing.
+Populated automatically by the CLI when it detects installed skills.
+Never sent to the registry.
+
+```json
+{
+  "version": "1",
+  "skills": [
+    {
+      "id": "github:alice/git-skills",
+      "name": "git-essentials",
+      "author": "alice",
+      "installedAt": "2026-01-15T10:00:00Z",
+      "path": "/Users/alice/.claude/skills/alice--git-skills",
+      "lastSeenAt": "2026-02-20T08:30:00Z"
+    }
+  ]
+}
+```
+
+## Extensibility contract for agents
+
+Any agent that reads or writes `trust.json` must:
+1. Parse the full file before writing — never overwrite blindly
+2. Preserve all existing fields it does not own
+3. Use a namespaced key under `extensions` for its own data
+4. Not remove `trusted_authors` or `sources` entries it did not create
+
+Unknown `sources[*].type` values are preserved verbatim and skipped
+gracefully by the CLI. Agents can introduce new source types without CLI
+changes.
+
+## Privacy model
+
+- `trust.json` is resolved into a flat list of GitHub handles client-side
+- Handles are sent anonymously with each search — never linked to a user identity
+- `db.json` is never transmitted; local signals are applied after the registry response
+- No user identity, session token, or device ID is created
+
+## What uberskills does NOT do
+
+- Install skills — use the source registry's CLI for that (e.g. `npx skills add`)
+- Remove or update skills
+- Maintain a user account
+- Provide a web UI
